@@ -1,0 +1,412 @@
+:root {
+  --bg: #171512;
+  --surface: #23201b;
+  --surface-soft: #2d2923;
+  --line: #433b32;
+  --text: #f1e7d8;
+  --muted: #b7aa98;
+  --primary: #d97745;
+  --primary-dark: #b85f33;
+  --danger: #ef8b78;
+  --todo: #a89b89;
+  --progress: #d97745;
+  --done: #76a879;
+  --closed: #8b8174;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  color: var(--text);
+  background: var(--bg);
+  font-family: "Segoe UI", "Noto Sans TC", Arial, sans-serif;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 24px 32px;
+  color: #f7ede0;
+  background: #11100e;
+  border-bottom: 1px solid #39332b;
+}
+
+.app-header h1 {
+  margin: 0 0 6px;
+  font-size: 28px;
+  letter-spacing: 0;
+}
+
+.app-header p {
+  margin: 0;
+  color: #b9ac9a;
+}
+
+#refreshButton {
+  min-width: 92px;
+  height: 40px;
+  border: 1px solid rgba(247, 237, 224, 0.22);
+  border-radius: 8px;
+  padding: 0 12px;
+  color: #f7ede0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.data-source-badge {
+  border: 1px solid #5a4d3f;
+  border-radius: 999px;
+  padding: 7px 10px;
+  color: #d7c8b6;
+  background: #201d19;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(280px, 380px) minmax(0, 1fr);
+  gap: 20px;
+  padding: 24px 32px 40px;
+}
+
+.task-form-panel,
+.task-board,
+.gantt-panel {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.task-form-panel {
+  padding: 20px;
+  align-self: start;
+}
+
+.task-board,
+.gantt-panel {
+  padding: 20px;
+}
+
+.task-board {
+  grid-column: 2;
+}
+
+.gantt-panel {
+  grid-column: 1 / -1;
+}
+
+h2 {
+  margin: 0 0 16px;
+  font-size: 20px;
+  letter-spacing: 0;
+}
+
+form {
+  display: grid;
+  gap: 14px;
+}
+
+label {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 10px 12px;
+  color: var(--text);
+  background: #191714;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(193, 95, 60, 0.14);
+  outline: 0;
+}
+
+textarea {
+  resize: vertical;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.primary-action {
+  border: 0;
+  border-radius: 6px;
+  padding: 11px 14px;
+  color: #171512;
+  background: var(--primary);
+  cursor: pointer;
+}
+
+.primary-action:hover {
+  background: var(--primary-dark);
+}
+
+.form-actions,
+.row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.secondary-action,
+.edit-button {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 8px 10px;
+  color: var(--text);
+  background: #1b1916;
+  cursor: pointer;
+}
+
+.secondary-action:hover,
+.edit-button:hover {
+  border-color: #7c6553;
+  background: #2d2923;
+}
+
+.form-actions .primary-action,
+.form-actions .secondary-action {
+  padding: 11px 14px;
+}
+
+.form-message {
+  min-height: 20px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.section-heading span {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  border-bottom: 1px solid var(--line);
+  padding: 12px 10px;
+  text-align: left;
+  vertical-align: top;
+}
+
+th {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+  background: #2a261f;
+}
+
+.task-title {
+  font-weight: 600;
+}
+
+.task-description {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.status-select {
+  min-width: 112px;
+}
+
+.delete-button {
+  border: 1px solid #7d3f35;
+  border-radius: 6px;
+  padding: 8px 10px;
+  color: var(--danger);
+  background: #2b1b18;
+  cursor: pointer;
+}
+
+.gantt-chart {
+  display: grid;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.gantt-grid {
+  display: grid;
+  min-width: max-content;
+  align-items: center;
+}
+
+.gantt-header-row {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--surface);
+}
+
+.gantt-task-row {
+  position: relative;
+  min-height: 38px;
+}
+
+.gantt-corner,
+.gantt-label {
+  position: sticky;
+  left: 0;
+  z-index: 3;
+  height: 100%;
+  padding: 9px 12px 9px 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 14px;
+}
+
+.gantt-corner {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.gantt-day {
+  min-width: 44px;
+  padding: 8px 4px;
+  border-left: 1px solid var(--line);
+  text-align: center;
+}
+
+.gantt-track-lines {
+  grid-row: 1;
+  align-self: stretch;
+  min-height: 38px;
+  border-left: 1px solid var(--line);
+  background:
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 43px,
+      var(--line) 43px,
+      var(--line) 44px
+    ),
+    #1d1a16;
+}
+
+.gantt-bar {
+  grid-row: 1;
+  z-index: 1;
+  align-self: center;
+  min-width: 18px;
+  height: 24px;
+  margin: 0 3px;
+  border-radius: 5px;
+  color: #ffffff;
+  font-size: 12px;
+  line-height: 24px;
+  text-align: center;
+  overflow: hidden;
+}
+
+.status-todo {
+  background: var(--todo);
+}
+
+.status-in_progress {
+  background: var(--progress);
+}
+
+.status-done {
+  background: var(--done);
+}
+
+.status-closed {
+  background: var(--closed);
+}
+
+.empty-state {
+  padding: 24px;
+  color: var(--muted);
+  text-align: center;
+}
+
+@media (max-width: 900px) {
+  .app-header,
+  .workspace {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .task-board,
+  .gantt-panel {
+    grid-column: 1;
+  }
+}
+
+@media (max-width: 560px) {
+  .app-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .app-header h1 {
+    font-size: 22px;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+}

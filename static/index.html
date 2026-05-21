@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>2026PM 專案管理</title>
+    <link rel="stylesheet" href="./styles.css?v=20260521-firebase-ready">
+  </head>
+  <body>
+    <header class="app-header">
+      <div>
+        <h1>2026PM 專案管理</h1>
+        <p>任務清單、狀態追蹤與甘特圖，支援本機 SQLite 或 Firebase Firestore。</p>
+      </div>
+      <div class="header-actions">
+        <span id="dataSourceBadge" class="data-source-badge">本機資料庫</span>
+        <button id="refreshButton" type="button" title="重新整理">重新整理</button>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <section class="task-form-panel" aria-labelledby="formTitle">
+        <h2 id="formTitle">新增項目</h2>
+        <form id="taskForm">
+          <label>
+            項目名稱
+            <input name="title" required maxlength="120" placeholder="例如：完成需求訪談">
+          </label>
+          <label>
+            作業內容
+            <textarea name="description" rows="4" placeholder="記錄工作內容、交付物或注意事項"></textarea>
+          </label>
+          <div class="form-grid">
+            <label>
+              負責人
+              <input name="owner" maxlength="60" placeholder="例如：PM">
+            </label>
+            <label>
+              狀態
+              <select name="status">
+                <option value="todo">待處理</option>
+                <option value="in_progress">作業中</option>
+                <option value="done">已完成</option>
+                <option value="closed">結案</option>
+              </select>
+            </label>
+            <label>
+              開始日期
+              <input name="start_date" type="date" required>
+            </label>
+            <label>
+              結束日期
+              <input name="end_date" type="date" required>
+            </label>
+          </div>
+          <div class="form-actions">
+            <button id="submitButton" class="primary-action" type="submit">新增項目</button>
+            <button id="cancelEditButton" class="secondary-action" type="button" hidden>取消修改</button>
+          </div>
+          <p id="formMessage" class="form-message" role="status"></p>
+        </form>
+      </section>
+
+      <section class="task-board" aria-labelledby="listTitle">
+        <div class="section-heading">
+          <h2 id="listTitle">項目清單</h2>
+          <span id="taskCount">0 筆項目</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>項目</th>
+                <th>負責人</th>
+                <th>狀態</th>
+                <th>時程</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="taskRows"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="gantt-panel" aria-labelledby="ganttTitle">
+        <div class="section-heading">
+          <h2 id="ganttTitle">甘特圖</h2>
+          <span id="dateRange">尚無資料</span>
+        </div>
+        <div id="ganttChart" class="gantt-chart"></div>
+      </section>
+    </main>
+
+    <script type="module" src="./app.js?v=20260521-firebase-ready"></script>
+  </body>
+</html>

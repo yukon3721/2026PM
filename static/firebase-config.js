@@ -1,0 +1,13 @@
+export const dataMode = "firestore";
+
+export const tasksCollection = "tasks";
+export const useAnonymousAuth = true;
+
+export const firebaseConfig = {
+  apiKey: "AIzaSyCEV_Bo1OIAJthUBp_ceqajkx6mcfRExxw",
+  authDomain: "pm-2026pm.firebaseapp.com",
+  projectId: "pm-2026pm",
+  storageBucket: "pm-2026pm.firebasestorage.app",
+  messagingSenderId: "894249953274",
+  appId: "1:894249953274:web:6504a8d6e73816ea7b6643",
+};
