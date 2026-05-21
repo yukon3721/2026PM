@@ -53,6 +53,7 @@ class FrontendStaticTests(unittest.TestCase):
 
         self.assertIn("GoogleAuthProvider", app_js)
         self.assertIn("signInWithPopup", app_js)
+        self.assertIn("signInWithRedirect", app_js)
         self.assertIn("signOut", app_js)
         self.assertIn("allowedUserEmails", config_js)
         self.assertIn("code03721@gmail.com", config_js)

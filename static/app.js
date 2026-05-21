@@ -89,6 +89,11 @@ class FirestoreTaskStore {
     this.provider = new authModule.GoogleAuthProvider();
     this.collectionName = tasksCollection || "tasks";
     this.baseUrl = `https://firestore.googleapis.com/v1/projects/${firebaseConfig.projectId}/databases/(default)/documents/${this.collectionName}`;
+    const redirectResult = await authModule.getRedirectResult(this.auth);
+    if (redirectResult?.user && !this.isAllowedUser(redirectResult.user)) {
+      await this.signOut();
+      throw new Error("這個 Google 帳號沒有此系統的操作權限。");
+    }
   }
 
   get user() {
@@ -109,7 +114,15 @@ class FirestoreTaskStore {
   }
 
   async signIn() {
-    const result = await this.authModule.signInWithPopup(this.auth, this.provider);
+    const popupResult = this.authModule.signInWithPopup(this.auth, this.provider);
+    const timeout = new Promise((resolve) => {
+      setTimeout(() => resolve(null), 8000);
+    });
+    const result = await Promise.race([popupResult, timeout]);
+    if (!result) {
+      await this.authModule.signInWithRedirect(this.auth, this.provider);
+      return null;
+    }
     if (!this.isAllowedUser(result.user)) {
       await this.signOut();
       throw new Error("這個 Google 帳號沒有此系統的操作權限。");
@@ -470,6 +483,10 @@ refreshButton.addEventListener("click", () => {
 signInButton.addEventListener("click", async () => {
   try {
     const user = await taskStore.signIn();
+    if (!user) {
+      message.textContent = "正在前往 Google 登入。";
+      return;
+    }
     setSignedInView(user);
     message.textContent = "登入成功。";
     await loadTasks();
