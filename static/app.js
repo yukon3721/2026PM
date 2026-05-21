@@ -70,51 +70,91 @@ class FirestoreTaskStore {
 
     const appModule = await import("https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js");
     const authModule = await import("https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js");
-    const firestoreModule = await import("https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js");
     const app = appModule.initializeApp(firebaseConfig);
-    if (useAnonymousAuth) {
-      const auth = authModule.getAuth(app);
-      await authModule.signInAnonymously(auth);
+    this.auth = authModule.getAuth(app);
+    if (useAnonymousAuth && !this.auth.currentUser) {
+      await authModule.signInAnonymously(this.auth);
     }
-    this.db = firestoreModule.getFirestore(app);
-    this.firestore = firestoreModule;
     this.collectionName = tasksCollection || "tasks";
+    this.baseUrl = `https://firestore.googleapis.com/v1/projects/${firebaseConfig.projectId}/databases/(default)/documents/${this.collectionName}`;
   }
 
-  collectionRef() {
-    return this.firestore.collection(this.db, this.collectionName);
-  }
-
-  normalize(docSnapshot) {
+  async headers() {
+    const token = await this.auth.currentUser.getIdToken();
     return {
-      id: docSnapshot.id,
-      ...docSnapshot.data(),
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    };
+  }
+
+  async request(url, options = {}) {
+    const response = await fetch(url, {
+      ...options,
+      headers: await this.headers(),
+    });
+    const body = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(body.error?.message || "Firebase 操作失敗");
+    }
+    return body;
+  }
+
+  toFields(payload) {
+    return {
+      title: { stringValue: payload.title || "" },
+      description: { stringValue: payload.description || "" },
+      owner: { stringValue: payload.owner || "" },
+      status: { stringValue: payload.status || "todo" },
+      start_date: { stringValue: payload.start_date || "" },
+      end_date: { stringValue: payload.end_date || "" },
+      updated_at: { timestampValue: new Date().toISOString() },
+      ...(payload.created_at ? { created_at: { timestampValue: payload.created_at } } : {}),
+    };
+  }
+
+  fromFields(document) {
+    const fields = document.fields || {};
+    const value = (name) => fields[name]?.stringValue || "";
+    return {
+      id: document.name.split("/").at(-1),
+      title: value("title"),
+      description: value("description"),
+      owner: value("owner"),
+      status: value("status") || "todo",
+      start_date: value("start_date"),
+      end_date: value("end_date"),
     };
   }
 
   async list() {
-    const query = this.firestore.query(this.collectionRef(), this.firestore.orderBy("start_date", "asc"));
-    const snapshot = await this.firestore.getDocs(query);
-    return snapshot.docs.map((docSnapshot) => this.normalize(docSnapshot));
+    const body = await this.request(`${this.baseUrl}?orderBy=start_date`);
+    return (body.documents || []).map((document) => this.fromFields(document));
   }
 
   create(payload) {
-    return this.firestore.addDoc(this.collectionRef(), {
-      ...payload,
-      created_at: this.firestore.serverTimestamp(),
-      updated_at: this.firestore.serverTimestamp(),
+    return this.request(this.baseUrl, {
+      method: "POST",
+      body: JSON.stringify({
+        fields: this.toFields({
+          ...payload,
+          created_at: new Date().toISOString(),
+        }),
+      }),
     });
   }
 
   update(id, payload) {
-    return this.firestore.updateDoc(this.firestore.doc(this.db, this.collectionName, id), {
-      ...payload,
-      updated_at: this.firestore.serverTimestamp(),
+    const params = new URLSearchParams();
+    Object.keys(payload).forEach((key) => params.append("updateMask.fieldPaths", key));
+    params.append("updateMask.fieldPaths", "updated_at");
+    return this.request(`${this.baseUrl}/${id}?${params.toString()}`, {
+      method: "PATCH",
+      body: JSON.stringify({ fields: this.toFields(payload) }),
     });
   }
 
   delete(id) {
-    return this.firestore.deleteDoc(this.firestore.doc(this.db, this.collectionName, id));
+    return this.request(`${this.baseUrl}/${id}`, { method: "DELETE" });
   }
 }
 

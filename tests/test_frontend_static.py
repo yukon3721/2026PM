@@ -30,7 +30,7 @@ class FrontendStaticTests(unittest.TestCase):
 
         self.assertIn("firebasejs/12.13.0/firebase-app.js", app_js)
         self.assertIn("firebasejs/12.13.0/firebase-auth.js", app_js)
-        self.assertIn("firebasejs/12.13.0/firebase-firestore.js", app_js)
+        self.assertIn("firestore.googleapis.com/v1/projects", app_js)
         self.assertIn("class FirestoreTaskStore", app_js)
         self.assertIn("class LocalApiTaskStore", app_js)
         self.assertIn('dataMode = "firestore"', config_js)
