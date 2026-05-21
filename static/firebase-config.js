@@ -1,7 +1,7 @@
 export const dataMode = "firestore";
 
 export const tasksCollection = "tasks";
-export const useAnonymousAuth = true;
+export const allowedUserEmails = ["code03721@gmail.com"];
 
 export const firebaseConfig = {
   apiKey: "AIzaSyCEV_Bo1OIAJthUBp_ceqajkx6mcfRExxw",

@@ -7,7 +7,10 @@
   },
   "auth": {
     "providers": {
-      "anonymous": true
+      "googleSignIn": {
+        "oAuthBrandDisplayName": "2026PM",
+        "supportEmail": "code03721@gmail.com"
+      }
     }
   }
 }

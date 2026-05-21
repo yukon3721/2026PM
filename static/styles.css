@@ -55,7 +55,9 @@ textarea {
   color: #b9ac9a;
 }
 
-#refreshButton {
+#refreshButton,
+#signInButton,
+#signOutButton {
   min-width: 92px;
   height: 40px;
   border: 1px solid rgba(247, 237, 224, 0.22);
@@ -64,6 +66,24 @@ textarea {
   color: #f7ede0;
   background: transparent;
   cursor: pointer;
+}
+
+#signInButton {
+  color: #171512;
+  background: var(--primary);
+}
+
+#signOutButton {
+  color: #f7ede0;
+  background: #2d2923;
+}
+
+button:disabled,
+input:disabled,
+select:disabled,
+textarea:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
 }
 
 .header-actions {

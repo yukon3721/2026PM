@@ -1,4 +1,4 @@
-import { dataMode, firebaseConfig, tasksCollection, useAnonymousAuth } from "./firebase-config.js";
+import { allowedUserEmails, dataMode, firebaseConfig, tasksCollection } from "./firebase-config.js";
 
 const statusLabels = {
   todo: "待處理",
@@ -17,6 +17,9 @@ const refreshButton = document.querySelector("#refreshButton");
 const submitButton = document.querySelector("#submitButton");
 const cancelEditButton = document.querySelector("#cancelEditButton");
 const dataSourceBadge = document.querySelector("#dataSourceBadge");
+const signInButton = document.querySelector("#signInButton");
+const signOutButton = document.querySelector("#signOutButton");
+const userEmailBadge = document.querySelector("#userEmailBadge");
 
 let editingTaskId = null;
 let currentTasks = [];
@@ -24,6 +27,16 @@ let taskStore;
 
 class LocalApiTaskStore {
   label = "本機 SQLite";
+
+  async init() {}
+
+  async signIn() {}
+
+  async signOut() {}
+
+  get user() {
+    return { email: "local" };
+  }
 
   async request(path, options = {}) {
     const response = await fetch(path, {
@@ -70,17 +83,55 @@ class FirestoreTaskStore {
 
     const appModule = await import("https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js");
     const authModule = await import("https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js");
-    const app = appModule.initializeApp(firebaseConfig);
+    const app = appModule.getApps().length ? appModule.getApps()[0] : appModule.initializeApp(firebaseConfig);
     this.auth = authModule.getAuth(app);
-    if (useAnonymousAuth && !this.auth.currentUser) {
-      await authModule.signInAnonymously(this.auth);
-    }
+    this.authModule = authModule;
+    this.provider = new authModule.GoogleAuthProvider();
     this.collectionName = tasksCollection || "tasks";
     this.baseUrl = `https://firestore.googleapis.com/v1/projects/${firebaseConfig.projectId}/databases/(default)/documents/${this.collectionName}`;
   }
 
+  get user() {
+    return this.auth.currentUser;
+  }
+
+  isAllowedUser(user) {
+    return Boolean(user?.email && allowedUserEmails.includes(user.email));
+  }
+
+  async waitForAuthState() {
+    return new Promise((resolve) => {
+      const unsubscribe = this.authModule.onAuthStateChanged(this.auth, (user) => {
+        unsubscribe();
+        resolve(user);
+      });
+    });
+  }
+
+  async signIn() {
+    const result = await this.authModule.signInWithPopup(this.auth, this.provider);
+    if (!this.isAllowedUser(result.user)) {
+      await this.signOut();
+      throw new Error("這個 Google 帳號沒有此系統的操作權限。");
+    }
+    return result.user;
+  }
+
+  signOut() {
+    return this.authModule.signOut(this.auth);
+  }
+
+  async requireUser() {
+    const user = this.user || (await this.waitForAuthState());
+    if (!this.isAllowedUser(user)) {
+      throw new Error("請使用授權的 Google 帳號登入。");
+    }
+    return user;
+  }
+
   async headers() {
-    const token = await this.auth.currentUser.getIdToken();
+    const user = await this.requireUser();
+    const token = await user.getIdToken();
     return {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
@@ -199,6 +250,32 @@ function formatShortDate(dateText) {
   return `${Number(month)}/${Number(day)}`;
 }
 
+function setFormEnabled(enabled) {
+  Array.from(form.elements).forEach((element) => {
+    element.disabled = !enabled;
+  });
+  refreshButton.disabled = !enabled;
+}
+
+function setSignedOutView() {
+  setFormEnabled(false);
+  signInButton.hidden = false;
+  signOutButton.hidden = true;
+  userEmailBadge.hidden = true;
+  count.textContent = "0 筆項目";
+  rows.innerHTML = `<tr><td colspan="5" class="empty-state">請使用授權的 Google 帳號登入。</td></tr>`;
+  gantt.innerHTML = `<div class="empty-state">登入後會顯示甘特圖。</div>`;
+  dateRange.textContent = "尚未登入";
+}
+
+function setSignedInView(user) {
+  setFormEnabled(true);
+  signInButton.hidden = true;
+  signOutButton.hidden = false;
+  userEmailBadge.textContent = user.email;
+  userEmailBadge.hidden = false;
+}
+
 function getPayload() {
   const payload = Object.fromEntries(new FormData(form).entries());
   if (payload.end_date < payload.start_date) {
@@ -208,12 +285,9 @@ function getPayload() {
 }
 
 async function createTaskStore() {
-  if (dataMode === "firestore") {
-    const store = new FirestoreTaskStore();
-    await store.init();
-    return store;
-  }
-  return new LocalApiTaskStore();
+  const store = dataMode === "firestore" ? new FirestoreTaskStore() : new LocalApiTaskStore();
+  await store.init();
+  return store;
 }
 
 async function loadTasks() {
@@ -393,17 +467,42 @@ refreshButton.addEventListener("click", () => {
   });
 });
 
+signInButton.addEventListener("click", async () => {
+  try {
+    const user = await taskStore.signIn();
+    setSignedInView(user);
+    message.textContent = "登入成功。";
+    await loadTasks();
+  } catch (error) {
+    message.textContent = error.message;
+    setSignedOutView();
+  }
+});
+
+signOutButton.addEventListener("click", async () => {
+  await taskStore.signOut();
+  resetFormMode();
+  setSignedOutView();
+  message.textContent = "已登出。";
+});
+
 cancelEditButton.addEventListener("click", () => {
   resetFormMode();
   message.textContent = "已取消修改。";
 });
 
 resetFormMode();
+setSignedOutView();
 createTaskStore()
-  .then((store) => {
+  .then(async (store) => {
     taskStore = store;
     dataSourceBadge.textContent = store.label;
-    return loadTasks();
+    if (store.user && (!store.isAllowedUser || store.isAllowedUser(store.user))) {
+      setSignedInView(store.user);
+      await loadTasks();
+    } else {
+      setSignedOutView();
+    }
   })
   .catch((error) => {
     message.textContent = error.message;

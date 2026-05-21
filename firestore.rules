@@ -3,10 +3,15 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     match /tasks/{taskId} {
-      allow read: if request.auth != null;
-      allow create: if request.auth != null && isValidTask(request.resource.data);
-      allow update: if request.auth != null && isValidTask(request.resource.data);
-      allow delete: if request.auth != null;
+      allow read: if isOwner();
+      allow create: if isOwner() && isValidTask(request.resource.data);
+      allow update: if isOwner() && isValidTask(request.resource.data);
+      allow delete: if isOwner();
+    }
+
+    function isOwner() {
+      return request.auth != null
+        && request.auth.token.email == 'code03721@gmail.com';
     }
 
     function isValidTask(data) {

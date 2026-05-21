@@ -4,16 +4,19 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>2026PM 專案管理</title>
-    <link rel="stylesheet" href="./styles.css?v=20260521-firebase-ready">
+    <link rel="stylesheet" href="./styles.css?v=20260521-google-auth">
   </head>
   <body>
     <header class="app-header">
       <div>
         <h1>2026PM 專案管理</h1>
-        <p>任務清單、狀態追蹤與甘特圖，支援本機 SQLite 或 Firebase Firestore。</p>
+        <p>任務清單、狀態追蹤與甘特圖，資料存放於 Firebase Firestore。</p>
       </div>
       <div class="header-actions">
-        <span id="dataSourceBadge" class="data-source-badge">本機資料庫</span>
+        <span id="dataSourceBadge" class="data-source-badge">Firebase Firestore</span>
+        <span id="userEmailBadge" class="data-source-badge" hidden></span>
+        <button id="signInButton" type="button">Google 登入</button>
+        <button id="signOutButton" type="button" hidden>登出</button>
         <button id="refreshButton" type="button" title="重新整理">重新整理</button>
       </div>
     </header>
@@ -91,6 +94,6 @@
       </section>
     </main>
 
-    <script type="module" src="./app.js?v=20260521-firebase-ready"></script>
+    <script type="module" src="./app.js?v=20260521-google-auth"></script>
   </body>
 </html>

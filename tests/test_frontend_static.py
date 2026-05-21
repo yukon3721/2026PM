@@ -45,6 +45,22 @@ class FrontendStaticTests(unittest.TestCase):
         self.assertIn("firebase-config.js", readme)
         self.assertIn("Firebase CLI", readme)
 
+    def test_google_sign_in_restricts_to_allowed_account(self):
+        app_js = (ROOT / "static" / "app.js").read_text(encoding="utf-8")
+        config_js = (ROOT / "static" / "firebase-config.js").read_text(encoding="utf-8")
+        index_html = (ROOT / "static" / "index.html").read_text(encoding="utf-8")
+        rules = (ROOT / "firestore.rules").read_text(encoding="utf-8")
+
+        self.assertIn("GoogleAuthProvider", app_js)
+        self.assertIn("signInWithPopup", app_js)
+        self.assertIn("signOut", app_js)
+        self.assertIn("allowedUserEmails", config_js)
+        self.assertIn("code03721@gmail.com", config_js)
+        self.assertIn("signInButton", index_html)
+        self.assertIn("signOutButton", index_html)
+        self.assertIn("request.auth.token.email", rules)
+        self.assertIn("code03721@gmail.com", rules)
+
 
 if __name__ == "__main__":
     unittest.main()
