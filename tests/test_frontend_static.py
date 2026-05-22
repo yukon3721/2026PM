@@ -37,10 +37,23 @@ class FrontendStaticTests(unittest.TestCase):
         app_js = (ROOT / "static" / "app.js").read_text(encoding="utf-8")
         index_html = (ROOT / "static" / "index.html").read_text(encoding="utf-8")
 
-        self.assertIn('<input name="end_date" type="date">', index_html)
+        self.assertIn('name="end_date" type="date"', index_html)
         self.assertIn("formatEndDate", app_js)
         self.assertIn('task.end_date || "NA"', app_js)
         self.assertIn("payload.end_date && payload.end_date < payload.start_date", app_js)
+
+    def test_date_fields_have_calendar_buttons(self):
+        app_js = (ROOT / "static" / "app.js").read_text(encoding="utf-8")
+        index_html = (ROOT / "static" / "index.html").read_text(encoding="utf-8")
+        css = (ROOT / "static" / "styles.css").read_text(encoding="utf-8")
+
+        self.assertIn('id="startDateInput"', index_html)
+        self.assertIn('data-date-picker="startDateInput"', index_html)
+        self.assertIn('id="endDateInput"', index_html)
+        self.assertIn('data-date-picker="endDateInput"', index_html)
+        self.assertIn("datePickerButtons", app_js)
+        self.assertIn("showPicker", app_js)
+        self.assertIn(".date-field", css)
 
     def test_refresh_button_reports_state(self):
         app_js = (ROOT / "static" / "app.js").read_text(encoding="utf-8")

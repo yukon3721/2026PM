@@ -182,6 +182,27 @@ textarea {
   gap: 12px;
 }
 
+.date-field {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+}
+
+.date-picker-button {
+  min-width: 58px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 0 10px;
+  color: var(--text);
+  background: #1b1916;
+  cursor: pointer;
+}
+
+.date-picker-button:hover {
+  border-color: #7c6553;
+  background: #2d2923;
+}
+
 .primary-action {
   border: 0;
   border-radius: 6px;
@@ -456,6 +477,10 @@ th {
   }
 
   .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .date-field {
     grid-template-columns: 1fr;
   }
 }

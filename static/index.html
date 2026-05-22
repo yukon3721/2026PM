@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>2026PM 專案管理</title>
-    <link rel="stylesheet" href="./styles.css?v=20260522-end-date-na">
+    <link rel="stylesheet" href="./styles.css?v=20260522-date-picker">
   </head>
   <body>
     <header class="app-header">
@@ -49,11 +49,17 @@
             </label>
             <label>
               開始日期
-              <input name="start_date" type="date" required>
+              <span class="date-field">
+                <input id="startDateInput" name="start_date" type="date" required>
+                <button class="date-picker-button" type="button" data-date-picker="startDateInput">日曆</button>
+              </span>
             </label>
             <label>
               結束日期
-              <input name="end_date" type="date">
+              <span class="date-field">
+                <input id="endDateInput" name="end_date" type="date">
+                <button class="date-picker-button" type="button" data-date-picker="endDateInput">日曆</button>
+              </span>
             </label>
           </div>
           <div class="form-actions">
@@ -106,6 +112,6 @@
       </section>
     </main>
 
-    <script type="module" src="./app.js?v=20260522-end-date-na"></script>
+    <script type="module" src="./app.js?v=20260522-date-picker"></script>
   </body>
 </html>

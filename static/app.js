@@ -21,6 +21,7 @@ const signInButton = document.querySelector("#signInButton");
 const signOutButton = document.querySelector("#signOutButton");
 const userEmailBadge = document.querySelector("#userEmailBadge");
 const statusFilter = document.querySelector("#statusFilter");
+const datePickerButtons = document.querySelectorAll("[data-date-picker]");
 
 let editingTaskId = null;
 let currentTasks = [];
@@ -448,6 +449,14 @@ function startEditing(task) {
   form.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
+function openDatePicker(input) {
+  if (typeof input.showPicker === "function") {
+    input.showPicker();
+    return;
+  }
+  input.focus();
+}
+
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
   try {
@@ -551,6 +560,15 @@ signOutButton.addEventListener("click", async () => {
 cancelEditButton.addEventListener("click", () => {
   resetFormMode();
   message.textContent = "已取消修改。";
+});
+
+datePickerButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    const input = document.querySelector(`#${button.dataset.datePicker}`);
+    if (input) {
+      openDatePicker(input);
+    }
+  });
 });
 
 resetFormMode();
