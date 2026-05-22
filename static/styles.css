@@ -184,18 +184,25 @@ textarea {
 
 .date-field {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(158px, 1fr) 42px;
   gap: 8px;
 }
 
+.date-field input {
+  min-width: 158px;
+}
+
 .date-picker-button {
-  min-width: 58px;
+  width: 42px;
+  min-width: 42px;
   border: 1px solid var(--line);
   border-radius: 6px;
-  padding: 0 10px;
+  padding: 0;
   color: var(--text);
   background: #1b1916;
   cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
 }
 
 .date-picker-button:hover {
@@ -481,6 +488,6 @@ th {
   }
 
   .date-field {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(158px, 1fr) 42px;
   }
 }

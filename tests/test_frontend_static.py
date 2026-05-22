@@ -49,11 +49,14 @@ class FrontendStaticTests(unittest.TestCase):
 
         self.assertIn('id="startDateInput"', index_html)
         self.assertIn('data-date-picker="startDateInput"', index_html)
+        self.assertIn('aria-label="選擇開始日期"', index_html)
         self.assertIn('id="endDateInput"', index_html)
         self.assertIn('data-date-picker="endDateInput"', index_html)
+        self.assertIn('aria-label="選擇結束日期"', index_html)
         self.assertIn("datePickerButtons", app_js)
         self.assertIn("showPicker", app_js)
         self.assertIn(".date-field", css)
+        self.assertIn("minmax(158px, 1fr) 42px", css)
 
     def test_refresh_button_reports_state(self):
         app_js = (ROOT / "static" / "app.js").read_text(encoding="utf-8")
