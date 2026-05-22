@@ -42,6 +42,13 @@ class FrontendStaticTests(unittest.TestCase):
         self.assertIn('task.end_date || "NA"', app_js)
         self.assertIn("payload.end_date && payload.end_date < payload.start_date", app_js)
 
+    def test_refresh_button_reports_state(self):
+        app_js = (ROOT / "static" / "app.js").read_text(encoding="utf-8")
+
+        self.assertIn('message.textContent = "正在重新整理..."', app_js)
+        self.assertIn('message.textContent = "已重新整理。"', app_js)
+        self.assertIn("refreshButton.disabled = true", app_js)
+
     def test_frontend_has_firestore_data_layer_for_github_pages(self):
         app_js = (ROOT / "static" / "app.js").read_text(encoding="utf-8")
         config_js = (ROOT / "static" / "firebase-config.js").read_text(encoding="utf-8")
@@ -80,6 +87,11 @@ class FrontendStaticTests(unittest.TestCase):
         self.assertIn("signOutButton", index_html)
         self.assertIn("request.auth.token.email", rules)
         self.assertIn("code03721@gmail.com", rules)
+
+    def test_firestore_rules_allow_empty_end_date(self):
+        rules = (ROOT / "firestore.rules").read_text(encoding="utf-8")
+
+        self.assertIn("data.end_date == '' || data.end_date >= data.start_date", rules)
 
 
 if __name__ == "__main__":

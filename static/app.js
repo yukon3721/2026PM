@@ -507,10 +507,22 @@ rows.addEventListener("click", async (event) => {
   }
 });
 
-refreshButton.addEventListener("click", () => {
-  loadTasks().catch((error) => {
+refreshButton.addEventListener("click", async () => {
+  if (!taskStore) {
+    message.textContent = "資料尚未初始化，請稍後再試。";
+    return;
+  }
+
+  refreshButton.disabled = true;
+  message.textContent = "正在重新整理...";
+  try {
+    await loadTasks();
+    message.textContent = "已重新整理。";
+  } catch (error) {
     message.textContent = error.message;
-  });
+  } finally {
+    refreshButton.disabled = false;
+  }
 });
 
 signInButton.addEventListener("click", async () => {

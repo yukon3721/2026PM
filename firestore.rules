@@ -33,7 +33,7 @@ service cloud.firestore {
         && data.status in ['todo', 'in_progress', 'done', 'closed']
         && data.start_date is string
         && data.end_date is string
-        && data.end_date >= data.start_date;
+        && (data.end_date == '' || data.end_date >= data.start_date);
     }
   }
 }
