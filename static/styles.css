@@ -104,14 +104,16 @@ textarea:disabled {
 
 .workspace {
   display: grid;
-  grid-template-columns: minmax(280px, 380px) minmax(0, 1fr);
-  gap: 20px;
+  grid-template-columns: minmax(360px, 520px) minmax(420px, 680px);
+  justify-content: center;
+  gap: 24px;
   padding: 24px 32px 40px;
 }
 
 .task-form-panel,
 .task-board,
 .gantt-panel {
+  min-width: 0;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--surface);
@@ -129,10 +131,14 @@ textarea:disabled {
 
 .task-board {
   grid-column: 2;
+  max-width: 680px;
 }
 
 .gantt-panel {
   grid-column: 1 / -1;
+  width: 100%;
+  max-width: 1224px;
+  justify-self: center;
 }
 
 h2 {
@@ -148,6 +154,7 @@ form {
 
 label {
   display: grid;
+  min-width: 0;
   gap: 6px;
   color: var(--muted);
   font-size: 14px;
@@ -157,6 +164,7 @@ input,
 select,
 textarea {
   width: 100%;
+  min-width: 0;
   border: 1px solid var(--line);
   border-radius: 6px;
   padding: 10px 12px;
@@ -178,18 +186,18 @@ textarea {
 
 .form-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 12px;
 }
 
 .date-field {
   display: grid;
-  grid-template-columns: minmax(158px, 1fr) 42px;
+  grid-template-columns: minmax(0, 1fr) 42px;
   gap: 8px;
 }
 
 .date-field input {
-  min-width: 158px;
+  min-width: 0;
 }
 
 .date-picker-button {
@@ -450,7 +458,7 @@ th {
   text-align: center;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1040px) {
   .app-header,
   .workspace {
     padding-left: 18px;
@@ -459,11 +467,13 @@ th {
 
   .workspace {
     grid-template-columns: 1fr;
+    justify-content: stretch;
   }
 
   .task-board,
   .gantt-panel {
     grid-column: 1;
+    max-width: none;
   }
 
   .section-heading,
@@ -488,6 +498,6 @@ th {
   }
 
   .date-field {
-    grid-template-columns: minmax(158px, 1fr) 42px;
+    grid-template-columns: minmax(0, 1fr) 42px;
   }
 }

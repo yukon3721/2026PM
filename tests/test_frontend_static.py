@@ -56,7 +56,15 @@ class FrontendStaticTests(unittest.TestCase):
         self.assertIn("datePickerButtons", app_js)
         self.assertIn("showPicker", app_js)
         self.assertIn(".date-field", css)
-        self.assertIn("minmax(158px, 1fr) 42px", css)
+        self.assertIn("minmax(0, 1fr) 42px", css)
+
+    def test_workspace_columns_have_layout_bounds(self):
+        css = (ROOT / "static" / "styles.css").read_text(encoding="utf-8")
+
+        self.assertIn("minmax(360px, 520px) minmax(420px, 680px)", css)
+        self.assertIn("max-width: 680px", css)
+        self.assertIn("max-width: 1224px", css)
+        self.assertIn("min-width: 0", css)
 
     def test_refresh_button_reports_state(self):
         app_js = (ROOT / "static" / "app.js").read_text(encoding="utf-8")
