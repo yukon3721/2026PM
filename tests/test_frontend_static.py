@@ -23,6 +23,16 @@ class FrontendStaticTests(unittest.TestCase):
         self.assertIn(".gantt-panel", css)
         self.assertIn("grid-column: 1 / -1;", css)
 
+    def test_status_filter_controls_list_and_gantt(self):
+        app_js = (ROOT / "static" / "app.js").read_text(encoding="utf-8")
+        index_html = (ROOT / "static" / "index.html").read_text(encoding="utf-8")
+
+        self.assertIn("statusFilter", index_html)
+        self.assertIn("getFilteredTasks", app_js)
+        self.assertIn("renderFilteredTasks", app_js)
+        self.assertIn("renderTable(filteredTasks", app_js)
+        self.assertIn("renderGantt(filteredTasks)", app_js)
+
     def test_frontend_has_firestore_data_layer_for_github_pages(self):
         app_js = (ROOT / "static" / "app.js").read_text(encoding="utf-8")
         config_js = (ROOT / "static" / "firebase-config.js").read_text(encoding="utf-8")

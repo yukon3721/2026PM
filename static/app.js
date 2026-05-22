@@ -20,6 +20,7 @@ const dataSourceBadge = document.querySelector("#dataSourceBadge");
 const signInButton = document.querySelector("#signInButton");
 const signOutButton = document.querySelector("#signOutButton");
 const userEmailBadge = document.querySelector("#userEmailBadge");
+const statusFilter = document.querySelector("#statusFilter");
 
 let editingTaskId = null;
 let currentTasks = [];
@@ -268,6 +269,7 @@ function setFormEnabled(enabled) {
     element.disabled = !enabled;
   });
   refreshButton.disabled = !enabled;
+  statusFilter.disabled = !enabled;
 }
 
 function setSignedOutView() {
@@ -275,6 +277,7 @@ function setSignedOutView() {
   signInButton.hidden = false;
   signOutButton.hidden = true;
   userEmailBadge.hidden = true;
+  statusFilter.value = "all";
   count.textContent = "0 筆項目";
   rows.innerHTML = `<tr><td colspan="5" class="empty-state">請使用授權的 Google 帳號登入。</td></tr>`;
   gantt.innerHTML = `<div class="empty-state">登入後會顯示甘特圖。</div>`;
@@ -306,14 +309,30 @@ async function createTaskStore() {
 async function loadTasks() {
   const tasks = await taskStore.list();
   currentTasks = tasks;
-  renderTable(tasks);
-  renderGantt(tasks);
+  renderFilteredTasks();
 }
 
-function renderTable(tasks) {
-  count.textContent = `${tasks.length} 筆項目`;
+function getFilteredTasks() {
+  const selectedStatus = statusFilter.value;
+  if (selectedStatus === "all") {
+    return currentTasks;
+  }
+  return currentTasks.filter((task) => task.status === selectedStatus);
+}
+
+function renderFilteredTasks() {
+  const filteredTasks = getFilteredTasks();
+  renderTable(filteredTasks, currentTasks.length);
+  renderGantt(filteredTasks);
+}
+
+function renderTable(tasks, totalTasks = tasks.length) {
+  const selectedStatus = statusFilter.value;
+  count.textContent =
+    selectedStatus === "all" ? `${totalTasks} 筆項目` : `${tasks.length} / ${totalTasks} 筆項目`;
   if (tasks.length === 0) {
-    rows.innerHTML = `<tr><td colspan="5" class="empty-state">尚無項目</td></tr>`;
+    const emptyText = selectedStatus === "all" ? "尚無項目" : `沒有「${statusLabels[selectedStatus]}」的項目`;
+    rows.innerHTML = `<tr><td colspan="5" class="empty-state">${emptyText}</td></tr>`;
     return;
   }
 
@@ -447,6 +466,10 @@ rows.addEventListener("change", async (event) => {
   } catch (error) {
     message.textContent = error.message;
   }
+});
+
+statusFilter.addEventListener("change", () => {
+  renderFilteredTasks();
 });
 
 rows.addEventListener("click", async (event) => {

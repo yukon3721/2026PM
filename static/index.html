@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>2026PM 專案管理</title>
-    <link rel="stylesheet" href="./styles.css?v=20260521-google-auth">
+    <link rel="stylesheet" href="./styles.css?v=20260522-status-filter">
   </head>
   <body>
     <header class="app-header">
@@ -67,7 +67,19 @@
       <section class="task-board" aria-labelledby="listTitle">
         <div class="section-heading">
           <h2 id="listTitle">項目清單</h2>
-          <span id="taskCount">0 筆項目</span>
+          <div class="list-tools">
+            <label class="filter-control">
+              狀態
+              <select id="statusFilter">
+                <option value="all">全部狀態</option>
+                <option value="todo">待處理</option>
+                <option value="in_progress">作業中</option>
+                <option value="done">已完成</option>
+                <option value="closed">結案</option>
+              </select>
+            </label>
+            <span id="taskCount">0 筆項目</span>
+          </div>
         </div>
         <div class="table-wrap">
           <table>
@@ -94,6 +106,6 @@
       </section>
     </main>
 
-    <script type="module" src="./app.js?v=20260521-google-auth"></script>
+    <script type="module" src="./app.js?v=20260522-status-filter"></script>
   </body>
 </html>
