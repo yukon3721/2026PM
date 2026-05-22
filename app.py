@@ -97,7 +97,7 @@ def read_json(handler):
 
 def validate_task(payload, partial=False):
     data = {}
-    required = ["title", "start_date", "end_date"] if not partial else []
+    required = ["title", "start_date"] if not partial else []
 
     for field in required:
         if not str(payload.get(field, "")).strip():
@@ -122,6 +122,12 @@ def validate_task(payload, partial=False):
     for field in ["start_date", "end_date"]:
         if field in payload:
             value = str(payload[field]).strip()
+            if field == "end_date" and value.upper() == "NA":
+                data[field] = ""
+                continue
+            if field == "end_date" and not value:
+                data[field] = ""
+                continue
             try:
                 date.fromisoformat(value)
             except ValueError as exc:
@@ -191,7 +197,7 @@ class ProjectHandler(SimpleHTTPRequestHandler):
                     data.get("owner", ""),
                     data.get("status", "todo"),
                     data["start_date"],
-                    data["end_date"],
+                    data.get("end_date", ""),
                 ),
             )
             row = conn.execute(

@@ -33,6 +33,15 @@ class FrontendStaticTests(unittest.TestCase):
         self.assertIn("renderTable(filteredTasks", app_js)
         self.assertIn("renderGantt(filteredTasks)", app_js)
 
+    def test_end_date_can_be_empty_and_shows_na(self):
+        app_js = (ROOT / "static" / "app.js").read_text(encoding="utf-8")
+        index_html = (ROOT / "static" / "index.html").read_text(encoding="utf-8")
+
+        self.assertIn('<input name="end_date" type="date">', index_html)
+        self.assertIn("formatEndDate", app_js)
+        self.assertIn('task.end_date || "NA"', app_js)
+        self.assertIn("payload.end_date && payload.end_date < payload.start_date", app_js)
+
     def test_frontend_has_firestore_data_layer_for_github_pages(self):
         app_js = (ROOT / "static" / "app.js").read_text(encoding="utf-8")
         config_js = (ROOT / "static" / "firebase-config.js").read_text(encoding="utf-8")

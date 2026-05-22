@@ -264,6 +264,14 @@ function formatShortDate(dateText) {
   return `${Number(month)}/${Number(day)}`;
 }
 
+function getTaskEndDate(task) {
+  return task.end_date || task.start_date;
+}
+
+function formatEndDate(task) {
+  return task.end_date || "NA";
+}
+
 function setFormEnabled(enabled) {
   Array.from(form.elements).forEach((element) => {
     element.disabled = !enabled;
@@ -294,7 +302,8 @@ function setSignedInView(user) {
 
 function getPayload() {
   const payload = Object.fromEntries(new FormData(form).entries());
-  if (payload.end_date < payload.start_date) {
+  payload.end_date = payload.end_date.trim();
+  if (payload.end_date && payload.end_date < payload.start_date) {
     throw new Error("結束日期不能早於開始日期。");
   }
   return payload;
@@ -355,7 +364,7 @@ function renderTable(tasks, totalTasks = tasks.length) {
                 .join("")}
             </select>
           </td>
-          <td>${task.start_date}<br>${task.end_date}</td>
+          <td>${task.start_date}<br>${formatEndDate(task)}</td>
           <td>
             <div class="row-actions">
               <button class="edit-button" type="button" data-id="${task.id}">修改</button>
@@ -376,7 +385,7 @@ function renderGantt(tasks) {
   }
 
   const minStart = tasks.reduce((min, task) => (task.start_date < min ? task.start_date : min), tasks[0].start_date);
-  const maxEnd = tasks.reduce((max, task) => (task.end_date > max ? task.end_date : max), tasks[0].end_date);
+  const maxEnd = tasks.reduce((max, task) => (getTaskEndDate(task) > max ? getTaskEndDate(task) : max), getTaskEndDate(tasks[0]));
   const totalDays = Math.max(daysBetween(minStart, maxEnd) + 1, 1);
   dateRange.textContent = `${minStart} 到 ${maxEnd}`;
   const dayColumns = Array.from({ length: totalDays }, (_, index) => addDays(minStart, index));
@@ -394,7 +403,8 @@ function renderGantt(tasks) {
   const body = tasks
     .map((task) => {
       const offset = daysBetween(minStart, task.start_date);
-      const duration = Math.max(daysBetween(task.start_date, task.end_date) + 1, 1);
+      const taskEndDate = getTaskEndDate(task);
+      const duration = Math.max(daysBetween(task.start_date, taskEndDate) + 1, 1);
       const startColumn = offset + 2;
       const endColumn = startColumn + duration;
       return `
@@ -404,7 +414,7 @@ function renderGantt(tasks) {
           <div
             class="gantt-bar status-${task.status}"
             style="grid-column: ${startColumn} / ${endColumn};"
-            title="${escapeHtml(task.title)} - ${statusLabels[task.status]} - ${task.start_date} 到 ${task.end_date}"
+            title="${escapeHtml(task.title)} - ${statusLabels[task.status]} - ${task.start_date} 到 ${formatEndDate(task)}"
           >
             ${escapeHtml(statusLabels[task.status])}
           </div>
@@ -419,7 +429,7 @@ function resetFormMode() {
   editingTaskId = null;
   form.reset();
   form.elements.start_date.value = today();
-  form.elements.end_date.value = today();
+  form.elements.end_date.value = "";
   submitButton.textContent = "新增項目";
   cancelEditButton.hidden = true;
 }
@@ -431,7 +441,7 @@ function startEditing(task) {
   form.elements.owner.value = task.owner || "";
   form.elements.status.value = task.status;
   form.elements.start_date.value = task.start_date;
-  form.elements.end_date.value = task.end_date;
+  form.elements.end_date.value = task.end_date || "";
   submitButton.textContent = "儲存修改";
   cancelEditButton.hidden = false;
   message.textContent = `正在修改：${task.title}`;
