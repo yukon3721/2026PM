@@ -263,6 +263,43 @@ function formatShortDate(dateText) {
   return `${Number(month)}/${Number(day)}`;
 }
 
+function formatMonthLabel(dateText) {
+  const [year, month] = dateText.split("-");
+  return `${year}/${month}`;
+}
+
+function getIsoWeek(dateText) {
+  const [year, month, day] = dateText.split("-").map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day));
+  const dayNumber = date.getUTCDay() || 7;
+  date.setUTCDate(date.getUTCDate() + 4 - dayNumber);
+  const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
+  return Math.ceil(((date - yearStart) / 86400000 + 1) / 7);
+}
+
+function buildMonthSpans(dayColumns) {
+  const spans = [];
+  dayColumns.forEach((dateText, index) => {
+    const label = formatMonthLabel(dateText);
+    const current = spans.at(-1);
+    if (current?.label === label) {
+      current.count += 1;
+      return;
+    }
+    spans.push({ label, start: index + 2, count: 1 });
+  });
+  return spans;
+}
+
+function getStatusPercent(status) {
+  return {
+    todo: 0,
+    in_progress: 30,
+    done: 100,
+    closed: 100,
+  }[status] ?? 0;
+}
+
 function setFormEnabled(enabled) {
   Array.from(form.elements).forEach((element) => {
     element.disabled = !enabled;
@@ -361,39 +398,90 @@ function renderGantt(tasks) {
   const totalDays = Math.max(daysBetween(minStart, maxEnd) + 1, 1);
   dateRange.textContent = `${minStart} 到 ${maxEnd}`;
   const dayColumns = Array.from({ length: totalDays }, (_, index) => addDays(minStart, index));
-  const gridTemplate = `180px repeat(${totalDays}, minmax(44px, 1fr))`;
+  const monthSpans = buildMonthSpans(dayColumns);
+  const gridTemplate = `168px repeat(${totalDays}, minmax(36px, 38px))`;
 
   const header = `
-    <div class="gantt-grid gantt-header-row" style="grid-template-columns: ${gridTemplate};">
-      <div class="gantt-corner">項目</div>
+    <div class="gantt-grid gantt-month-row" style="grid-template-columns: ${gridTemplate};">
+      <div class="gantt-corner">工項名稱</div>
+      ${monthSpans
+        .map(
+          (span) =>
+            `<div class="gantt-month" style="grid-column: ${span.start} / ${span.start + span.count};">${span.label}</div>`
+        )
+        .join("")}
+    </div>
+    <div class="gantt-grid gantt-week-row" style="grid-template-columns: ${gridTemplate};">
+      <div class="gantt-corner gantt-corner-sub">階段</div>
       ${dayColumns
-        .map((dateText) => `<div class="gantt-day" title="${dateText}">${formatShortDate(dateText)}</div>`)
+        .map((dateText) => {
+          const day = new Date(`${dateText}T00:00:00Z`).getUTCDay();
+          const label = day === 1 || dateText === minStart ? `W${getIsoWeek(dateText)}` : "";
+          return `<div class="gantt-day" title="${dateText}">${label}</div>`;
+        })
         .join("")}
     </div>
   `;
 
   const body = tasks
-    .map((task) => {
+    .map((task, index) => {
       const offset = daysBetween(minStart, task.start_date);
       const duration = Math.max(daysBetween(task.start_date, task.end_date) + 1, 1);
       const startColumn = offset + 2;
       const endColumn = startColumn + duration;
+      const percent = getStatusPercent(task.status);
+      const linkEndColumn = Math.min(endColumn + 2, totalDays + 2);
+      const link =
+        index < tasks.length - 1 && endColumn < totalDays + 2
+          ? `<div class="gantt-link" style="grid-column: ${endColumn} / ${linkEndColumn};"></div>`
+          : "";
       return `
         <div class="gantt-grid gantt-task-row" style="grid-template-columns: ${gridTemplate};">
-          <div class="gantt-label" title="${escapeHtml(task.title)}">${escapeHtml(task.title)}</div>
+          <div class="gantt-label" title="${escapeHtml(task.title)}">
+            <span class="gantt-disclosure">${index === 0 ? "▾" : ""}</span>
+            <span>${escapeHtml(task.title)}</span>
+          </div>
           <div class="gantt-track-lines" style="grid-column: 2 / -1;"></div>
+          ${link}
           <div
             class="gantt-bar status-${task.status}"
             style="grid-column: ${startColumn} / ${endColumn};"
             title="${escapeHtml(task.title)} - ${statusLabels[task.status]} - ${task.start_date} 到 ${task.end_date}"
           >
-            ${escapeHtml(statusLabels[task.status])}
+            <span>${escapeHtml(statusLabels[task.status])}</span>
+            <strong>${percent}%</strong>
           </div>
         </div>
       `;
     })
     .join("");
-  gantt.innerHTML = header + body;
+  gantt.innerHTML = `
+    <div class="gantt-shell">
+      <div class="gantt-toolbar">
+        <div class="gantt-brand">
+          <span class="gantt-brand-mark">≈</span>
+          <div>
+            <strong>FlowWise</strong>
+            <span>排程</span>
+          </div>
+        </div>
+        <div class="gantt-search">搜尋工項...</div>
+        <div class="gantt-segments" aria-label="甘特圖檢視模式">
+          <span>專案</span>
+          <span>負責人</span>
+          <span>工程</span>
+        </div>
+        <div class="gantt-range-controls" aria-label="甘特圖日期範圍">
+          <span>${minStart}</span>
+          <span>${maxEnd}</span>
+          <span>套用</span>
+        </div>
+      </div>
+      <div class="gantt-planner">
+        ${header}${body}
+      </div>
+    </div>
+  `;
 }
 
 function resetFormMode() {
