@@ -9,6 +9,24 @@ service cloud.firestore {
       allow delete: if isOwner();
     }
 
+    match /checkProjects/{projectId} {
+      allow read, create, update: if isOwner();
+      allow delete: if false;
+
+      match /items/{itemId} {
+        allow read: if isOwner();
+        allow create: if isOwner() && isValidCheckItem(request.resource.data);
+        allow update: if isOwner() && isValidCheckItem(request.resource.data);
+        allow delete: if isOwner();
+      }
+
+      match /auditLogs/{logId} {
+        allow read: if isOwner();
+        allow create: if isOwner() && isValidAuditLog(request.resource.data);
+        allow update, delete: if false;
+      }
+    }
+
     function isOwner() {
       return request.auth != null
         && request.auth.token.email == 'code03721@gmail.com';
@@ -34,6 +52,65 @@ service cloud.firestore {
         && data.start_date is string
         && data.end_date is string
         && (data.end_date == '' || data.end_date >= data.start_date);
+    }
+
+    function isValidCheckItem(data) {
+      return data.keys().hasOnly([
+          'itemNo',
+          'sequence',
+          'category',
+          'focus',
+          'method',
+          'supervisor',
+          'assigneeText',
+          'assignees',
+          'plannedDateText',
+          'plannedDate',
+          'actualDateText',
+          'actualDate',
+          'status',
+          'progress',
+          'riskNote',
+          'handlingMethod',
+          'improvementAction',
+          'recheckDateText',
+          'recheckDate',
+          'recheckResult',
+          'attachmentUrl',
+          'sourceRowIndex',
+          'importBatchId',
+          'createdAt',
+          'updatedAt',
+          'updatedBy'
+        ])
+        && data.itemNo is string
+        && data.category is string
+        && data.focus is string
+        && data.status in ['未填報', '未開始', '進行中', '已完成']
+        && (!('progress' in data) || data.progress == null || (data.progress is number && data.progress >= 0 && data.progress <= 100))
+        && (!('actualDateText' in data) || data.actualDateText is string)
+        && (!('riskNote' in data) || data.riskNote is string)
+        && (!('improvementAction' in data) || data.improvementAction is string)
+        && (!('recheckDateText' in data) || data.recheckDateText is string)
+        && (!('recheckResult' in data) || data.recheckResult is string);
+    }
+
+    function isValidAuditLog(data) {
+      return data.keys().hasOnly([
+          'itemId',
+          'action',
+          'changedFields',
+          'changedBy',
+          'changedAt',
+          'importBatchId',
+          'recordCount'
+        ])
+        && data.itemId is string
+        && data.action in ['create', 'update', 'delete', 'import']
+        && data.changedBy == request.auth.token.email
+        && data.changedAt is string
+        && (!('importBatchId' in data) || data.importBatchId is string)
+        && (!('recordCount' in data) || data.recordCount is number);
     }
   }
 }

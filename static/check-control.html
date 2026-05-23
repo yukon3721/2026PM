@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>通車前查核管控</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'/%3E">
+    <link rel="stylesheet" href="./styles.css?v=20260523-check-control">
+  </head>
+  <body>
+    <header class="app-header">
+      <div>
+        <h1>通車前查核管控</h1>
+        <p>信義線延伸段安全衛生處查核項目，資料存放於 Firebase Firestore。</p>
+      </div>
+      <div class="header-actions">
+        <a class="nav-link" href="./index.html">專案管理</a>
+        <span id="checkDataSourceBadge" class="data-source-badge">Firebase Firestore</span>
+        <span id="checkUserEmailBadge" class="data-source-badge" hidden></span>
+        <button id="checkSignInButton" type="button">Google 登入</button>
+        <button id="checkSignOutButton" type="button" hidden>登出</button>
+        <button id="checkRefreshButton" type="button">重新整理</button>
+      </div>
+    </header>
+
+    <main class="check-workspace">
+      <section class="check-summary-panel" aria-labelledby="checkSummaryTitle">
+        <div class="section-heading">
+          <h2 id="checkSummaryTitle">管控總覽</h2>
+          <span id="checkCount">0 筆項目</span>
+        </div>
+        <div id="checkStats" class="stat-grid"></div>
+      </section>
+
+      <section class="check-board" aria-labelledby="checkListTitle">
+        <div class="section-heading">
+          <h2 id="checkListTitle">查核清單</h2>
+          <div class="list-tools check-tools">
+            <label class="filter-control">
+              狀態
+              <select id="checkStatusFilter">
+                <option value="all">全部狀態</option>
+                <option value="未填報">未填報</option>
+                <option value="未開始">未開始</option>
+                <option value="進行中">進行中</option>
+                <option value="已完成">已完成</option>
+              </select>
+            </label>
+            <label class="filter-control">
+              類別
+              <select id="checkCategoryFilter">
+                <option value="all">全部類別</option>
+              </select>
+            </label>
+            <label class="filter-control search-control">
+              搜尋
+              <input id="checkSearchInput" type="search" placeholder="查核重點、風險、改善措施">
+            </label>
+            <button id="checkNewButton" class="primary-action" type="button">新增查核項目</button>
+            <button id="checkExportButton" class="secondary-action" type="button">匯出 CSV</button>
+          </div>
+        </div>
+        <div class="import-strip">
+          <label>
+            匯入 JSON 預覽
+            <input id="checkImportFile" type="file" accept="application/json,.json">
+          </label>
+          <button id="checkImportButton" class="secondary-action" type="button">匯入 Firestore</button>
+        </div>
+        <p id="checkMessage" class="form-message" role="status"></p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>項次</th>
+                <th>查核重點</th>
+                <th>主管 / 執行</th>
+                <th>時程</th>
+                <th>狀態</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="checkRows"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="check-editor" aria-labelledby="checkEditorTitle">
+        <h2 id="checkEditorTitle">更新查核項目</h2>
+        <form id="checkEditForm">
+          <input name="id" type="hidden">
+          <div class="form-grid">
+            <label>
+              項次
+              <input name="itemNo" required placeholder="例如：5-1">
+            </label>
+            <label>
+              類別
+              <select id="checkCategoryInput" name="category" required></select>
+            </label>
+          </div>
+          <label>
+            查核重點
+            <textarea name="focus" rows="4" required></textarea>
+          </label>
+          <label>
+            檢查方式
+            <input name="method" placeholder="例如：現場查察">
+          </label>
+          <div class="form-grid">
+            <label>
+              主管
+              <input name="supervisor" placeholder="例如：黃建成">
+            </label>
+            <label>
+              執行人員
+              <input name="assigneeText" placeholder="例如：黃乾隆 / 王小明">
+            </label>
+          </div>
+          <label>
+            預計完成日
+            <input name="plannedDateText" data-calendar-input autocomplete="off" placeholder="YYYY-MM-DD">
+          </label>
+          <div class="form-grid">
+            <label>
+              辦理狀態
+              <select name="status">
+                <option value="未填報">未填報</option>
+                <option value="未開始">未開始</option>
+                <option value="進行中">進行中</option>
+                <option value="已完成">已完成</option>
+              </select>
+            </label>
+            <label>
+              完成率
+              <input name="progress" type="number" min="0" max="100" placeholder="0-100">
+            </label>
+            <label>
+              實際完成日
+              <input name="actualDateText" data-calendar-input autocomplete="off" placeholder="YYYY-MM-DD">
+            </label>
+            <label>
+              複查日期
+              <input name="recheckDateText" data-calendar-input autocomplete="off" placeholder="YYYY-MM-DD">
+            </label>
+          </div>
+          <label>
+            異常/風險說明
+            <textarea name="riskNote" rows="3"></textarea>
+          </label>
+          <label>
+            改善措施
+            <textarea name="improvementAction" rows="3"></textarea>
+          </label>
+          <label>
+            複查結果
+            <input name="recheckResult" placeholder="合格 / 仍有缺失 / 已改善">
+          </label>
+          <label>
+            相關檔案連結
+            <input name="attachmentUrl" placeholder="https://...">
+          </label>
+          <div class="form-actions">
+            <button id="checkSaveButton" class="primary-action" type="submit">儲存更新</button>
+            <button id="checkCancelButton" class="secondary-action" type="button">清除選取</button>
+          </div>
+        </form>
+      </section>
+    </main>
+
+    <div id="calendarPopover" class="calendar-popover" hidden></div>
+
+    <script type="module" src="./check-control.js?v=20260523-check-control"></script>
+  </body>
+</html>

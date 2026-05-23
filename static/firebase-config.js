@@ -1,6 +1,8 @@
 export const dataMode = "firestore";
 
 export const tasksCollection = "tasks";
+export const checkProjectsCollection = "checkProjects";
+export const checkProjectId = "xinyi-extension-safety-1150518";
 export const allowedUserEmails = ["code03721@gmail.com"];
 
 export const firebaseConfig = {
